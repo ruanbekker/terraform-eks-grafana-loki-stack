@@ -36,6 +36,6 @@ locals {
     chunks_s3_bucket = "${var.environment}-${local.helm.loki_release}-chunks-${local.aws_account_id}"
     ruler_s3_bucket  = "${var.environment}-${local.helm.loki_release}-ruler-${local.aws_account_id}"
     iam_name_prefix  = "${var.environment}-${local.helm.loki_release}"
-    log_retention    = var.log_retention
+    log_retention    = var.loki_log_retention
   }
 }
