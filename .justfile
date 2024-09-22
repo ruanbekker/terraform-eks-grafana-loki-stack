@@ -14,6 +14,7 @@ help:
     @echo "  output      Show output values from Terraform"
     @echo "  clean       Remove .tfstate files"
     @echo "  cost        Show the cost estimation for resources"
+    @echo "  docs        Provides terraform module documentation output"
 
 # Validate Terraform configuration
 validate:
@@ -49,3 +50,7 @@ clean:
     @rm -rf example/.helm
 
 # Show cost estimation
+
+# Module docs, using terraform-docs
+docs:
+    @docker run --rm --volume "$(pwd):/terraform-docs" -u $(id -u) quay.io/terraform-docs/terraform-docs:0.19.0 markdown /terraform-docs
