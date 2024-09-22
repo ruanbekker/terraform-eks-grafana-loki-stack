@@ -3,7 +3,7 @@ variable "region" {
 } 
 
 variable "profile" {
-  default = "rbkr:master:terraform"
+  default = null
 }
 
 variable "project_name" {
