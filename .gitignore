@@ -1,0 +1,3 @@
+example/.helm
+example/.terraform*
+example/tfplan
