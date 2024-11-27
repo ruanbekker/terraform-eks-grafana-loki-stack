@@ -9,6 +9,33 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
+  eks_managed_node_group_defaults = {
+    instance_types   = [var.eks_desired_size]
+    cluster_version  = local.versions.eks
+    root_volume_type = "gp3"
+    root_volume_size = 30
+    # root_encrypted   = true
+    # root_kms_key_id  = data.aws_kms_key.launch_template.arn
+    iam_role_additional_policies = {
+      ssm_default_policy = "arn:aws:iam::aws:policy/AmazonSSMManagedEC2InstanceDefaultPolicy"
+    }
+    enable_bootstrap_user_data = true
+    pre_bootstrap_user_data    = <<-EOF
+      MIME-Version: 1.0
+      Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+      --==MYBOUNDARY==
+      Content-Type: text/x-shellscript; charset="us-ascii"
+
+      #!/bin/bash
+      yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+      systemctl enable amazon-ssm-agent.service
+      systemctl start amazon-ssm-agent.service
+
+      --==MYBOUNDARY==--
+      EOF
+  }
+
   eks_managed_node_groups = {
     nodegroup1 = {
       desired_size = var.eks_desired_size
@@ -29,11 +56,35 @@ module "eks" {
       }
 
     }
+
+    #observability-a = {
+    #  name           = "observability-a"
+    #  subnet_ids     = [data.aws_subnet.eu-west-1a-subnet.id]
+    #  min_size       = 1
+    #  desired_size   = 1
+    #  capacity_type  = "ON_DEMAND"
+    #  instance_types = ["m6a.xlarge"]
+    #  labels = {
+    #    observability = "true"
+    #  }
+    #  taints = [
+    #    {
+    #      key    = "observability"
+    #      value  = "true"
+    #      effect = "NO_EXECUTE"
+    #    }
+    #  ]
+    #},
+
   }
 
   cluster_addons = {
-    coredns    = {}
-    kube-proxy = {}
+    coredns = {
+      addon_version = "v1.11.3-eksbuild.2"
+    }
+    kube-proxy = {
+      addon_version = "v1.29.10-eksbuild.3"
+    }
     aws-ebs-csi-driver = {
       most_recent = true
     }
